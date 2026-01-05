@@ -1,0 +1,955 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#0b1220" />
+  <title>战区站点 · 模拟经营</title>
+
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="战区站点">
+
+  <style>
+    :root{
+      --bg:#0b1220;
+      --panel: rgba(255,255,255,.06);
+      --panel2: rgba(255,255,255,.10);
+      --txt:#eaf0ff;
+      --muted: rgba(234,240,255,.72);
+      --accent:#8bb6ff;
+      --good:#6ee7b7;
+      --warn:#fbbf24;
+      --bad:#fb7185;
+      --shadow: 0 10px 35px rgba(0,0,0,.35);
+      --radius: 16px;
+    }
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      background: radial-gradient(1200px 800px at 20% 10%, rgba(139,182,255,.18), transparent 60%),
+                  radial-gradient(1000px 700px at 80% 20%, rgba(110,231,183,.12), transparent 55%),
+                  radial-gradient(900px 650px at 40% 90%, rgba(251,113,133,.10), transparent 55%),
+                  var(--bg);
+      color:var(--txt);
+      font: 14px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    }
+    a{ color: var(--accent); }
+    .wrap{ max-width: 980px; margin: 0 auto; padding: 14px 14px 26px; }
+    .topbar{
+      display:flex; gap:10px; align-items:center; justify-content:space-between;
+      padding: 12px 14px; border-radius: var(--radius);
+      background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.05));
+      box-shadow: var(--shadow);
+      position: sticky; top: 0; z-index: 10;
+      backdrop-filter: blur(10px);
+    }
+    .brand{ display:flex; flex-direction:column; gap:2px; }
+    .brand .title{ font-weight:800; letter-spacing:.5px; }
+    .brand .sub{ color: var(--muted); font-size:12px; }
+    .pills{ display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end; }
+    .pill{
+      padding:6px 10px; border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.18);
+      color: var(--muted);
+      font-size:12px;
+      display:flex; align-items:center; gap:6px;
+      user-select:none;
+    }
+    .dot{ width:8px; height:8px; border-radius:50%; background: rgba(255,255,255,.35); }
+    .dot.good{ background: var(--good); }
+    .dot.warn{ background: var(--warn); }
+    .dot.bad{ background: var(--bad); }
+
+    .grid{
+      margin-top: 12px;
+      display:grid;
+      grid-template-columns: 1.05fr .95fr;
+      gap: 12px;
+    }
+    @media (max-width: 920px){
+      .grid{ grid-template-columns: 1fr; }
+      .pills{ justify-content:flex-start; }
+    }
+
+    .card{
+      border-radius: var(--radius);
+      background: var(--panel);
+      border: 1px solid rgba(255,255,255,.12);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .card .hd{
+      padding: 12px 14px;
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+      background: linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.02));
+      border-bottom: 1px solid rgba(255,255,255,.10);
+    }
+    .hd .h{ font-weight:800; }
+    .hd .hint{ color: var(--muted); font-size:12px; }
+
+    .card .bd{ padding: 12px 14px; }
+
+    .stats{
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap:10px;
+    }
+    @media (max-width: 520px){ .stats{ grid-template-columns: repeat(2, 1fr);} }
+    .stat{
+      background: rgba(0,0,0,.18);
+      border:1px solid rgba(255,255,255,.10);
+      border-radius: 14px;
+      padding: 10px 10px;
+      display:flex; flex-direction:column; gap:6px;
+    }
+    .stat .k{ color: var(--muted); font-size:12px; }
+    .stat .v{ font-size:18px; font-weight:900; letter-spacing:.2px; }
+    .bar{
+      height:8px; border-radius:999px; overflow:hidden;
+      background: rgba(255,255,255,.08);
+      border:1px solid rgba(255,255,255,.10);
+    }
+    .bar > i{ display:block; height:100%; width:40%; background: rgba(139,182,255,.60); }
+
+    .actions{ display:grid; grid-template-columns: repeat(2,1fr); gap:10px; }
+    @media (max-width: 520px){ .actions{ grid-template-columns: 1fr; } }
+    button{
+      appearance:none;
+      border:1px solid rgba(255,255,255,.14);
+      background: linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.04));
+      color: var(--txt);
+      border-radius: 14px;
+      padding: 11px 12px;
+      font-weight:800;
+      letter-spacing:.2px;
+      box-shadow: 0 10px 20px rgba(0,0,0,.22);
+      cursor:pointer;
+      text-align:left;
+    }
+    button:active{ transform: translateY(1px); }
+    button[disabled]{ opacity:.55; cursor:not-allowed; transform:none; }
+    .btnSub{ display:block; margin-top:4px; color: var(--muted); font-weight:600; font-size:12px; }
+
+    .log{
+      height: 390px;
+      overflow:auto;
+      padding: 12px 12px;
+      background: rgba(0,0,0,.16);
+      border:1px solid rgba(255,255,255,.10);
+      border-radius: 14px;
+    }
+    .msg{ margin: 0 0 10px; }
+    .msg .who{ font-weight:900; }
+    .msg .txt{ color: var(--txt); white-space: pre-wrap; margin-top: 2px; }
+    .msg .meta{ color: var(--muted); font-size:12px; margin-top: 3px; }
+    .msg.system .who{ color: var(--accent); }
+    .msg.error .who{ color: var(--bad); }
+
+    .choices{ display:flex; flex-wrap:wrap; gap:8px; margin-top: 10px; }
+    .chip{
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.22);
+      color: var(--txt);
+      padding:8px 10px;
+      border-radius: 999px;
+      font-weight:800;
+      cursor:pointer;
+      user-select:none;
+    }
+    .chip:active{ transform: translateY(1px); }
+
+    .row{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+    .smallBtn{
+      padding: 8px 10px;
+      border-radius: 12px;
+      font-weight:800;
+    }
+
+    /* modal */
+    .modalBack{
+      position:fixed; inset:0;
+      background: rgba(0,0,0,.55);
+      display:none;
+      align-items:center; justify-content:center;
+      padding: 18px;
+      z-index: 9999;
+    }
+    .modal{
+      width:min(920px, 100%);
+      max-height: min(84vh, 720px);
+      overflow:auto;
+      border-radius: 18px;
+      background: rgba(15,18,28,.94);
+      border:1px solid rgba(255,255,255,.14);
+      box-shadow: var(--shadow);
+    }
+    .modal .mh{
+      padding: 12px 14px;
+      display:flex; justify-content:space-between; align-items:center; gap:10px;
+      border-bottom: 1px solid rgba(255,255,255,.10);
+      position: sticky; top: 0;
+      background: rgba(15,18,28,.92);
+      backdrop-filter: blur(10px);
+    }
+    textarea{
+      width:100%;
+      min-height: 380px;
+      resize: vertical;
+      padding: 12px;
+      border-radius: 14px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.24);
+      color: var(--txt);
+      font: 12px/1.4 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      outline:none;
+    }
+    .warnBox{
+      margin-top: 10px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      border:1px solid rgba(251,191,36,.22);
+      background: rgba(251,191,36,.08);
+      color: rgba(255,255,255,.88);
+      font-size:12px;
+    }
+  </style>
+</head>
+
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <div class="brand">
+      <div class="title">战区站点 · 模拟经营</div>
+      <div class="sub">主线经营｜每消耗 1 体力触发一次事件｜甜+安全感</div>
+    </div>
+    <div class="pills">
+      <div class="pill" title="脚本状态"><span class="dot" id="jsDot"></span><span id="jsState">JS 加载中…</span></div>
+      <div class="pill" title="当前版本"><span class="dot good"></span><span id="ver">v3.0</span></div>
+      <div class="pill" title="离线缓存(可选)"><span class="dot" id="swDot"></span><span id="swState">SW 未启用</span></div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <div class="hd">
+        <div>
+          <div class="h">站点状态</div>
+          <div class="hint">把经营做稳，恋爱会自己长出来。</div>
+        </div>
+        <div class="row">
+          <button class="smallBtn" id="btnEditor">剧情编辑</button>
+          <button class="smallBtn" id="btnReset">清除存档</button>
+        </div>
+      </div>
+      <div class="bd">
+        <div class="stats">
+          <div class="stat">
+            <div class="k">天数</div>
+            <div class="v" id="day">1</div>
+          </div>
+          <div class="stat">
+            <div class="k">体力</div>
+            <div class="v" id="st">6 / 6</div>
+            <div class="bar"><i id="stBar" style="width:100%"></i></div>
+          </div>
+          <div class="stat">
+            <div class="k">资金</div>
+            <div class="v" id="money">0</div>
+          </div>
+          <div class="stat">
+            <div class="k">食物</div>
+            <div class="v" id="food">3</div>
+          </div>
+          <div class="stat">
+            <div class="k">药品</div>
+            <div class="v" id="med">2</div>
+          </div>
+          <div class="stat">
+            <div class="k">舒适感</div>
+            <div class="v" id="comfort">50</div>
+            <div class="bar"><i id="comfortBar" style="width:50%"></i></div>
+          </div>
+        </div>
+
+        <div style="height:12px"></div>
+
+        <div class="actions">
+          <button id="btnTreat">
+            治疗伤员（-1 体力，-1 药）
+            <span class="btnSub">赚取报酬与口碑。稳定、踏实，主线经营。</span>
+          </button>
+          <button id="btnShop">
+            开店营业（-1 体力，-1 食）
+            <span class="btnSub">接待来往的人，也更容易遇到“熟人”。</span>
+          </button>
+          <button id="btnSearch">
+            外出搜索（-1 体力）
+            <span class="btnSub">随机获得食物/药品，或偶遇某个你在意的人。</span>
+          </button>
+          <button id="btnRestock">
+            补货进仓（不耗体力）
+            <span class="btnSub">用钱买食物与药：食物+2（$6），药+1（$8）。</span>
+          </button>
+          <button id="btnRest">
+            结束今日（恢复体力）
+            <span class="btnSub">夜里更容易触发“安全感”剧情。</span>
+          </button>
+          <button id="btnHelp">
+            诊断 / 强制刷新
+            <span class="btnSub">如果卡在“JS加载中/点不动”，点这里会给出修复建议。</span>
+          </button>
+        </div>
+
+        <div style="height:12px"></div>
+        <div class="warnBox" id="tipBox" style="display:none"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="hd">
+        <div>
+          <div class="h">对话与事件</div>
+          <div class="hint">你可以把这里当作“站点日记”。</div>
+        </div>
+        <div class="hint" id="affHint">好感：西蒙/基根/柯尼格/普莱斯/克鲁格</div>
+      </div>
+      <div class="bd">
+        <div class="log" id="log"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- modal: editor -->
+<div class="modalBack" id="mb">
+  <div class="modal">
+    <div class="mh">
+      <div>
+        <div style="font-weight:900">剧情编辑器</div>
+        <div style="color:rgba(234,240,255,.72);font-size:12px;margin-top:2px">把 JSON 里的台词改成你自己的口吻，保存后立刻生效（只存在你手机本地）。</div>
+      </div>
+      <div class="row">
+        <button class="smallBtn" id="btnTemplate">填入模板</button>
+        <button class="smallBtn" id="btnLoad">载入当前</button>
+        <button class="smallBtn" id="btnSave">保存并应用</button>
+        <button class="smallBtn" id="btnClose">关闭</button>
+      </div>
+    </div>
+    <div class="bd">
+      <textarea id="editor"></textarea>
+      <div class="warnBox">
+        小提示：事件发生频率由 <code>weight</code> 决定；越大越常见。你想“恋爱多一些”，就把 romance 类型的权重加大一点点就好。
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* =========================
+   Warzone Station v3.0
+   - 单文件主逻辑（避免“JS没加载”的坑）
+   - 所有台词使用模板字符串（支持换行，不会语法炸）
+   - 支持剧情编辑器（JSON）
+   ========================= */
+
+(function(){
+  const $ = (id)=>document.getElementById(id);
+
+  // --- Small helpers ---
+  const clamp = (n, a, b)=>Math.max(a, Math.min(b, n));
+  const rint = (a,b)=>Math.floor(Math.random()*(b-a+1))+a;
+  const pick = (arr)=>arr[Math.floor(Math.random()*arr.length)];
+
+  // --- Debug / Diagnostics ---
+  const tipBox = $("tipBox");
+  function tip(html){
+    tipBox.style.display = "block";
+    tipBox.innerHTML = html;
+  }
+  function tipHide(){
+    tipBox.style.display = "none";
+    tipBox.textContent = "";
+  }
+  window.addEventListener("error", (e)=>{
+    tip(`<b style="color:#fb7185">脚本错误：</b>${(e.message||"")}<br><span style="color:rgba(234,240,255,.72)">${(e.filename||"")} : ${e.lineno||0}:${e.colno||0}</span>`);
+  });
+  window.addEventListener("unhandledrejection", (e)=>{
+    tip(`<b style="color:#fb7185">Promise 错误：</b>${String(e.reason||e)}`);
+  });
+
+  // --- UI: log ---
+  const logEl = $("log");
+  function addMsg(who, txt, meta="", cls=""){
+    const p = document.createElement("div");
+    p.className = "msg " + (cls||"");
+    p.innerHTML = `<div class="who">${who}</div><div class="txt"></div>${meta?`<div class="meta">${meta}</div>`:""}`;
+    p.querySelector(".txt").textContent = txt;
+    logEl.appendChild(p);
+    logEl.scrollTop = logEl.scrollHeight;
+  }
+
+  // --- Save ---
+  const SAVE_KEY = "wz_station_v3_save";
+  const EVENT_KEY = "wz_station_v3_events";
+  function save(){
+    localStorage.setItem(SAVE_KEY, JSON.stringify(state));
+  }
+  function load(){
+    try{
+      const raw = localStorage.getItem(SAVE_KEY);
+      if (!raw) return null;
+      return JSON.parse(raw);
+    }catch(_){ return null; }
+  }
+
+  // --- Game state ---
+  const DEFAULT = {
+    day: 1,
+    staminaMax: 6,
+    stamina: 6,
+    money: 10,
+    food: 3,
+    med: 2,
+    comfort: 50, // 0..100
+    affection: { simon: 18, keegan: 12, koenig: 12, price: 10, krueger: 10 },
+    flags: { lastMeet: { simon:0, keegan:0, koenig:0, price:0, krueger:0 } },
+    seen: {}, // event id -> count
+  };
+
+  let state = load() || structuredClone(DEFAULT);
+
+  // --- Affection stages ---
+  const STAGES = [
+    { p: 20, name: "路人" },
+    { p: 30, name: "熟人" },
+    { p: 50, name: "在意" },
+    { p: 70, name: "暗恋" },
+    { p: 100, name: "忍不住表白" },
+  ];
+  function stage(p){
+    for (let i=0;i<STAGES.length;i++){
+      if (p <= STAGES[i].p) return STAGES[i];
+    }
+    return STAGES[STAGES.length-1];
+  }
+
+  // --- Events (default) ---
+  function baseEvents(){
+    return {
+      version: "v3",
+      events: [
+        // system / random
+        {
+          id: "sys_warm_lamp",
+          type: "random",
+          weight: 8,
+          contexts: ["night"],
+          text: [`你把灯调亮一点，站点里那种“能被找到”的安全感就回来了。`],
+          choices: [
+            { label: "把毯子叠好（舒适+）", apply: (s)=>{ s.comfort = clamp(s.comfort+4,0,100);} },
+            { label: "记一笔账（资金+）", apply: (s)=>{ s.money += 2; } },
+          ]
+        },
+        {
+          id: "rand_stray_cat",
+          type: "random",
+          weight: 7,
+          contexts: ["shop","day","night"],
+          text: [`一只瘦猫钻进门缝，站在柜台边盯着你，像在问：这里是不是安全的？`],
+          choices: [
+            { label: "给它一点食物（-1 食，舒适+）", apply: (s)=>{ if(s.food>0){s.food-=1; s.comfort=clamp(s.comfort+5,0,100);} } },
+            { label: "把门留条缝（舒适+）", apply: (s)=>{ s.comfort=clamp(s.comfort+2,0,100);} },
+          ]
+        },
+
+        // romance: Simon
+        {
+          id: "simon_early_check",
+          type: "romance",
+          actor: "simon",
+          weight: 10,
+          contexts: ["night","shop"],
+          when: (s)=> s.affection.simon < 30,
+          text: [
+            `门外传来很轻的敲击声。\n\n西蒙：是我。\n你打开门，他没有立刻进来，先把视线扫过街角，再落回你身上。\n西蒙：我路过，来确认你没事。\n你：我好好的。\n他像把这句话收进胸口，声音更低了点：\n西蒙：好。那就好。`,
+            `你把杯子放回架子，门口那道高大的影子挡了一下光。\n\n西蒙：别让灯熄。\n你：嗯？\n西蒙：我不想在外面找你。\n他顿了顿，像是怕自己说得太直白，又把语气压回去：\n西蒙：把灯留着。`,
+          ],
+          choices: [
+            { label: "给他倒一杯热水（+好感）", apply:(s)=>{ s.affection.simon+=6; s.comfort=clamp(s.comfort+4,0,100);} },
+            { label: "点头说“我等你” （+好感，舒适+）", apply:(s)=>{ s.affection.simon+=5; s.comfort=clamp(s.comfort+6,0,100);} },
+          ]
+        },
+        {
+          id: "simon_mid_glove",
+          type: "romance",
+          actor: "simon",
+          weight: 8,
+          contexts: ["day","shop"],
+          when: (s)=> s.affection.simon >= 30 && s.affection.simon < 70,
+          text: [
+            `你手背被箱子边缘划了一道，刚皱眉，西蒙就把你的手扣住了。\n\n西蒙：别动。\n你：只是小划伤……\n他把一次性手套套在你手上，动作克制得像在压住情绪：\n西蒙：你在这里撑着，已经够了。\n西蒙：剩下的交给我。`,
+          ],
+          choices: [
+            { label: "把手心贴在他掌心里（+好感）", apply:(s)=>{ s.affection.simon+=7; s.comfort=clamp(s.comfort+5,0,100);} },
+            { label: "笑一下说“你来得正好”（+好感）", apply:(s)=>{ s.affection.simon+=6;} },
+          ]
+        },
+
+        // romance: Keegan
+        {
+          id: "keegan_early_sugar",
+          type: "romance",
+          actor: "keegan",
+          weight: 10,
+          contexts: ["shop","day"],
+          when: (s)=> s.affection.keegan < 30,
+          text: [
+            `你正清点物资，基根把一小包糖放在柜台上。\n\n基根：路上捡到的，别问我怎么“捡”的。\n你：你又在笑。\n基根：我只是想看你松一口气。\n他把糖往你那边推了推：\n基根：今天也辛苦了。`,
+          ],
+          choices: [
+            { label: "收下糖（舒适+，+好感）", apply:(s)=>{ s.comfort=clamp(s.comfort+6,0,100); s.affection.keegan+=6;} },
+            { label: "分他一半（+好感）", apply:(s)=>{ s.affection.keegan+=7;} },
+          ]
+        },
+
+        // romance: König
+        {
+          id: "koenig_early_coat",
+          type: "romance",
+          actor: "koenig",
+          weight: 10,
+          contexts: ["night","search"],
+          when: (s)=> s.affection.koenig < 30,
+          text: [
+            `你外出回来时风很冷，柯尼格站在路灯下像一堵沉默的墙。\n\n柯尼格：你走得太久。\n你：我没事。\n他把外套披到你肩上，动作很轻，却不容拒绝：\n柯尼格：你说“没事”之前，先让我确认。\n他的嗓音低得发哑：\n柯尼格：我会负责把你带回来。`,
+          ],
+          choices: [
+            { label: "把外套拢紧（舒适+，+好感）", apply:(s)=>{ s.comfort=clamp(s.comfort+7,0,100); s.affection.koenig+=6;} },
+            { label: "说“谢谢你来找我”（+好感）", apply:(s)=>{ s.affection.koenig+=7;} },
+          ]
+        },
+
+        // romance: Price
+        {
+          id: "price_mid_tea",
+          type: "romance",
+          actor: "price",
+          weight: 9,
+          contexts: ["night","shop"],
+          when: (s)=> s.affection.price < 50,
+          text: [
+            `普莱斯把一只旧搪瓷杯放在你面前。\n\n普莱斯：喝点热的。\n你：你怎么知道我冷？\n普莱斯：因为你握杯子的姿势。\n他像在说一条军规那样认真：\n普莱斯：你在这儿撑着，我们才能放心。\n普莱斯：所以你得先学会照顾自己。`,
+          ],
+          choices: [
+            { label: "乖乖喝一口（舒适+，+好感）", apply:(s)=>{ s.comfort=clamp(s.comfort+6,0,100); s.affection.price+=6;} },
+            { label: "回一句“我会的”（+好感）", apply:(s)=>{ s.affection.price+=5;} },
+          ]
+        },
+
+        // romance: Krueger
+        {
+          id: "krueger_early_guard",
+          type: "romance",
+          actor: "krueger",
+          weight: 9,
+          contexts: ["shop","day","night"],
+          when: (s)=> s.affection.krueger < 30,
+          text: [
+            `你把门闩扣上，回头就看见克鲁格靠在墙边。\n\n克鲁格：太早关门。\n你：今天不太安全。\n他轻轻哼了一声，像赞同你的谨慎：\n克鲁格：我会在外面转一圈。\n他抬眼看你，目光像刀刃一样冷，却把话说得很稳：\n克鲁格：你别怕。`,
+          ],
+          choices: [
+            { label: "点头说“我信你”（+好感，舒适+）", apply:(s)=>{ s.affection.krueger+=6; s.comfort=clamp(s.comfort+5,0,100);} },
+            { label: "递给他一盏小灯（-1 食/或无，+好感）", apply:(s)=>{ if(s.food>0) s.food-=1; s.affection.krueger+=7;} },
+          ]
+        },
+      ]
+    };
+  }
+
+  // --- Load events from local storage or default ---
+  function loadEvents(){
+    try{
+      const raw = localStorage.getItem(EVENT_KEY);
+      if (!raw) return baseEvents();
+      const obj = JSON.parse(raw);
+      if (!obj || !Array.isArray(obj.events)) return baseEvents();
+      return obj;
+    }catch(_){ return baseEvents(); }
+  }
+  let EV = loadEvents();
+
+  // --- Context builder ---
+  function ctxFor(action){
+    const c = [];
+    if (state.day <= 2) c.push("early"); else c.push("mid");
+    if (state.stamina <= 2) c.push("tired");
+    if (state.comfort >= 70) c.push("safe");
+    if (state.comfort <= 35) c.push("tense");
+    c.push(action);
+    c.push(state.day % 2 === 0 ? "day" : "night");
+    return c;
+  }
+
+  // --- Weighted event selection with "pity" (more male leads) ---
+  const ACTORS = ["simon","keegan","koenig","price","krueger"];
+  function actorPityWeight(actor){
+    const last = state.flags.lastMeet[actor] || 0;
+    const gap = Math.max(0, state.day - last);
+    // gap越大越容易遇到（最多+8）
+    return clamp(gap, 0, 8);
+  }
+
+  function eligibleEvents(contexts){
+    const out = [];
+    for (const e of EV.events){
+      if (e.when && !e.when(state)) continue;
+      if (e.contexts && e.contexts.length){
+        let ok = false;
+        for (const cc of contexts){
+          if (e.contexts.includes(cc)) { ok = true; break; }
+        }
+        if (!ok) continue;
+      }
+      out.push(e);
+    }
+    return out;
+  }
+
+  function pickEvent(contexts){
+    const list = eligibleEvents(contexts);
+    if (!list.length) return null;
+
+    // compute weight
+    let sum = 0;
+    const w = list.map(e=>{
+      let ww = Number(e.weight||1);
+      if (e.type === "romance" && e.actor){
+        ww += actorPityWeight(e.actor);
+      }
+      // if seen too often, gently reduce
+      const seen = state.seen[e.id] || 0;
+      if (seen >= 2) ww = Math.max(1, Math.floor(ww * 0.7));
+      sum += ww;
+      return ww;
+    });
+
+    let r = Math.random()*sum;
+    for (let i=0;i<list.length;i++){
+      r -= w[i];
+      if (r <= 0) return list[i];
+    }
+    return list[list.length-1];
+  }
+
+  // --- Render affection hint ---
+  function affLine(){
+    const a = state.affection;
+    const fmt = (k, label)=>{
+      const st = stage(a[k]);
+      return `${label}${a[k]}%·${st.name}`;
+    };
+    return `好感：${fmt("simon","西蒙 ")}｜${fmt("keegan","基根 ")}｜${fmt("koenig","柯尼格 ")}｜${fmt("price","普莱斯 ")}｜${fmt("krueger","克鲁格 ")}`;
+  }
+
+  // --- UI update ---
+  function sync(){
+    $("day").textContent = String(state.day);
+    $("money").textContent = "$" + String(state.money);
+    $("food").textContent = String(state.food);
+    $("med").textContent = String(state.med);
+    $("comfort").textContent = String(state.comfort);
+
+    $("st").textContent = `${state.stamina} / ${state.staminaMax}`;
+    $("stBar").style.width = `${Math.round(100*state.stamina/state.staminaMax)}%`;
+    $("comfortBar").style.width = `${clamp(state.comfort,0,100)}%`;
+
+    $("affHint").textContent = affLine();
+
+    // button disable
+    $("btnTreat").disabled = state.stamina<=0 || state.med<=0;
+    $("btnShop").disabled = state.stamina<=0 || state.food<=0;
+    $("btnSearch").disabled = state.stamina<=0;
+  }
+
+  // --- Choice UI ---
+  function showChoices(choices){
+    const box = document.createElement("div");
+    box.className = "choices";
+    for (const ch of choices){
+      const b = document.createElement("div");
+      b.className = "chip";
+      b.textContent = ch.label;
+      b.onclick = ()=>{
+        try{
+          ch.apply && ch.apply(state);
+          save();
+          sync();
+          addMsg("系统", `已选择：${ch.label}`, "", "system");
+        }catch(e){
+          addMsg("系统", "选择执行失败：" + (e && e.message ? e.message : String(e)), "", "error");
+        }finally{
+          box.remove();
+        }
+      };
+      box.appendChild(b);
+    }
+    logEl.appendChild(box);
+    logEl.scrollTop = logEl.scrollHeight;
+  }
+
+  // --- Trigger event ---
+  function trigger(contexts){
+    const e = pickEvent(contexts);
+    if (!e){
+      addMsg("系统", "今天很安静，安静得有点像恩赐。", "", "system");
+      return;
+    }
+    state.seen[e.id] = (state.seen[e.id]||0) + 1;
+
+    if (e.type === "romance" && e.actor){
+      state.flags.lastMeet[e.actor] = state.day;
+    }
+
+    const txt = Array.isArray(e.text) ? pick(e.text) : String(e.text||"");
+    const actorName = ({
+      simon: "西蒙",
+      keegan: "基根",
+      koenig: "柯尼格",
+      price: "普莱斯",
+      krueger: "克鲁格"
+    })[e.actor] || "事件";
+
+    const who = e.type === "romance" ? actorName : "站点";
+    const meta = e.type === "romance"
+      ? `好感阶段：${stage(state.affection[e.actor]||0).name}`
+      : `随机事件`;
+
+    addMsg(who, txt, meta, e.type === "romance" ? "" : "system");
+
+    if (Array.isArray(e.choices) && e.choices.length){
+      showChoices(e.choices);
+    }
+    save();
+    sync();
+  }
+
+  // --- Actions ---
+  function spendStamina(n=1){
+    state.stamina = clamp(state.stamina-n, 0, state.staminaMax);
+  }
+
+  function actTreat(){
+    spendStamina(1);
+    state.med -= 1;
+    const earn = rint(6,10);
+    state.money += earn;
+    state.comfort = clamp(state.comfort+2, 0, 100);
+    addMsg("你", `你把药箱压在膝盖上，动作又快又稳。\n伤员缓过气来，连声道谢。\n\n（资金 +$${earn}，药品 -1，体力 -1）`, "主线经营");
+    trigger(ctxFor("treat"));
+  }
+
+  function actShop(){
+    spendStamina(1);
+    state.food -= 1;
+    const earn = rint(4,9);
+    state.money += earn;
+    addMsg("你", `你把“营业”的牌子挂出来，站点一下子热闹了。\n\n（资金 +$${earn}，食物 -1，体力 -1）`, "主线经营");
+    trigger(ctxFor("shop"));
+  }
+
+  function actSearch(){
+    spendStamina(1);
+    const roll = Math.random();
+    if (roll < 0.45){
+      const f = rint(1,2);
+      state.food += f;
+      addMsg("你", `你沿着废弃的便利店翻找，最后拎回一袋还能吃的东西。\n\n（食物 +${f}，体力 -1）`, "外出搜索");
+    }else if (roll < 0.78){
+      const m = 1;
+      state.med += m;
+      addMsg("你", `你在废墟里找到一小盒未开封的药。\n\n（药品 +${m}，体力 -1）`, "外出搜索");
+    }else{
+      addMsg("你", `你在回程路上听到熟悉的脚步声——有人在跟着你。\n你没回头，但你知道那不是敌意。\n\n（体力 -1）`, "外出搜索");
+    }
+    trigger(ctxFor("search"));
+  }
+
+  function actRestock(){
+    tipHide();
+    // buy: food+2 costs 6; med+1 costs 8
+    if (state.money < 6 && state.money < 8){
+      addMsg("系统", "钱不够补货了。先稳住经营，再想浪漫。", "", "system");
+      return;
+    }
+    let did = false;
+    if (state.money >= 6){
+      state.money -= 6;
+      state.food += 2;
+      did = true;
+      addMsg("系统", "补货：食物 +2（-$6）", "", "system");
+    }
+    if (state.money >= 8){
+      state.money -= 8;
+      state.med += 1;
+      did = true;
+      addMsg("系统", "补货：药品 +1（-$8）", "", "system");
+    }
+    if (did){
+      save();
+      sync();
+    }
+  }
+
+  function actRest(){
+    state.day += 1;
+    state.stamina = state.staminaMax;
+    state.comfort = clamp(state.comfort + 3, 0, 100);
+    addMsg("系统", "你把门闩扣好，把灯留着。明天还要继续。", "新的一天", "system");
+    save();
+    sync();
+    // Rest tends to night events
+    trigger(ctxFor("night"));
+  }
+
+  // --- Editor ---
+  const mb = $("mb");
+  const ed = $("editor");
+  function openEditor(){ mb.style.display="flex"; }
+  function closeEditor(){ mb.style.display="none"; }
+
+  const TEMPLATE = baseEvents();
+
+  function renderTemplate(){
+    ed.value = JSON.stringify(TEMPLATE, null, 2);
+  }
+  function renderCurrent(){
+    ed.value = JSON.stringify(EV, null, 2);
+  }
+  function applyFromEditor(){
+    try{
+      const obj = JSON.parse(ed.value);
+      if (!obj || !Array.isArray(obj.events)) throw new Error("JSON 结构不对：必须有 events 数组");
+      EV = obj;
+      localStorage.setItem(EVENT_KEY, JSON.stringify(obj));
+      addMsg("系统", "剧情已保存并应用（仅本机）。", "", "system");
+      closeEditor();
+    }catch(e){
+      addMsg("系统", "保存失败：" + (e && e.message ? e.message : String(e)), "", "error");
+      openEditor();
+    }
+  }
+
+  // --- Reset save ---
+  function hardReset(){
+    localStorage.removeItem(SAVE_KEY);
+    state = structuredClone(DEFAULT);
+    logEl.innerHTML = "";
+    addMsg("系统", "存档已清空。我们从第一天重新来。", "", "system");
+    save();
+    sync();
+  }
+
+  // --- Help / diagnostics (non-complex but effective) ---
+  function help(){
+    const url = new URL(location.href);
+    const nosw = url.searchParams.get("nosw") === "1";
+    const msg = [
+      `如果你看到“JS 加载中…/点不动”，通常是：`,
+      `1) 页面没更新到最新版本（缓存）`,
+      `2) PWA 离线缓存（SW）控制了旧文件`,
+      ``,
+      `你可以试：`,
+      `A) 打开：${location.origin + location.pathname}?v=${Date.now()}  （强制绕缓存）`,
+      `B) 或打开：?nosw=1  （临时禁用离线缓存）`,
+      ``,
+      `当前模式：${nosw ? "nosw=1（不注册 SW）" : "正常模式（会注册 SW）"}`
+    ].join("\n");
+    addMsg("诊断", msg, "", "system");
+
+    // Try to unregister SW if requested
+    if (!("serviceWorker" in navigator)){
+      tip("此浏览器不支持 Service Worker（没关系，仍可在线玩）。");
+      return;
+    }
+    if (nosw){
+      navigator.serviceWorker.getRegistrations().then(regs=>{
+        return Promise.all(regs.map(r=>r.unregister()));
+      }).then(()=>{
+        tip("已尝试注销离线缓存（SW）。现在用 ?v=xxx 再打开一次，通常就能更新。");
+      }).catch(()=> tip("注销 SW 失败：Safari 有时会限制。建议用 设置→Safari→高级→网站数据 删除该站点数据。"));
+    }else{
+      tip("如果你怀疑是缓存：试试在网址后加 ?nosw=1 或 ?v=2 重新打开。");
+    }
+  }
+
+  // --- SW register (optional) ---
+  function setupSW(){
+    const url = new URL(location.href);
+    const nosw = url.searchParams.get("nosw")==="1";
+    const swDot = $("swDot"), swState = $("swState");
+    if (nosw){
+      swDot.className = "dot warn";
+      swState.textContent = "SW 已禁用（nosw=1）";
+      return;
+    }
+    if (!("serviceWorker" in navigator)){
+      swDot.className = "dot warn";
+      swState.textContent = "SW 不支持";
+      return;
+    }
+    navigator.serviceWorker.register("./sw.js").then((reg)=>{
+      swDot.className = "dot good";
+      swState.textContent = "SW 已启用";
+      // try update immediately
+      if (reg.waiting) reg.waiting.postMessage({type:"SKIP_WAITING"});
+      reg.update().catch(()=>{});
+      navigator.serviceWorker.addEventListener("controllerchange", ()=>{
+        // new SW took control
+      });
+    }).catch((e)=>{
+      swDot.className = "dot bad";
+      swState.textContent = "SW 启用失败";
+      tip(`SW 注册失败：${String(e && e.message ? e.message : e)}`);
+    });
+  }
+
+  // --- Wire buttons ---
+  function bind(){
+    $("btnTreat").onclick = actTreat;
+    $("btnShop").onclick = actShop;
+    $("btnSearch").onclick = actSearch;
+    $("btnRestock").onclick = actRestock;
+    $("btnRest").onclick = actRest;
+    $("btnHelp").onclick = help;
+
+    $("btnEditor").onclick = ()=>{ openEditor(); renderCurrent(); };
+    $("btnReset").onclick = ()=>{ hardReset(); };
+
+    $("btnClose").onclick = closeEditor;
+    $("btnTemplate").onclick = renderTemplate;
+    $("btnLoad").onclick = renderCurrent;
+    $("btnSave").onclick = applyFromEditor;
+  }
+
+  // --- Boot ---
+  function boot(){
+    // js loaded indicator
+    $("jsDot").className = "dot good";
+    $("jsState").textContent = "JS 已加载";
+    addMsg("系统", "欢迎来到战区站点。今天先把经营做稳，恋爱会慢慢长出来。", "v3.0", "system");
+    bind();
+    setupSW();
+    sync();
+    save();
+  }
+
+  // Actually boot
+  boot();
+})();
+</script>
+</body>
+</html>
