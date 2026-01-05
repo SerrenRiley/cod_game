@@ -247,7 +247,7 @@ body{
 <body>
 <div id="jsStatus" style="position:fixed;right:10px;bottom:10px;z-index:99999;
 background:#111827;color:#e5e7eb;border:1px solid rgba(255,255,255,.15);
-padding:6px 10px;border-radius:999px;font:12px/1.2 system-ui;opacity:.85">JS 未加载</div>
+padding:6px 10px;border-radius:999px;font:12px/1.2 system-ui;opacity:.85" id="jsStatus">JS 加载中…</div>
 <div id="jsError" style="display:none;position:fixed;left:10px;right:10px;top:10px;z-index:99999;
 background:#2a0f13;color:#ffe4e6;border:1px solid rgba(255,255,255,.15);
 padding:10px 12px;border-radius:12px;font:12px/1.35 system-ui;white-space:pre-wrap"></div>
@@ -268,6 +268,7 @@ padding:10px 12px;border-radius:12px;font:12px/1.35 system-ui;white-space:pre-wr
 <div class="headerActions">
 <button class="btn primary" id="btnNew">新开档</button>
 <button class="btn" id="btnSave">手动保存</button>
+<button class="btn" id="btnEditor">剧情编辑</button>
 <button class="btn danger" id="btnResetBest">清空存档</button>
 </div>
 </header>
@@ -1514,6 +1515,7 @@ function boot(){
   }
 
   wire();
+  if (typeof initEditor==="function") initEditor();
   renderAll();
   setEvent(null);
 
@@ -1526,7 +1528,10 @@ function boot(){
   }
 }
 
+let __wiredOnce=false;
 function wire(){
+  if (__wiredOnce) return;
+  __wiredOnce=true;
   el.btnSave.addEventListener("click", () => {
     saveState(true);
     addSys("存档已写入本地。");

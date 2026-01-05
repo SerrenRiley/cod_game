@@ -1,9 +1,10 @@
 /* Warzone Station PWA Service Worker (cache-first) */
-const CACHE = "wz-station-v1";
+const CACHE = "wz-station-v2";
 const CORE = [
   "./",
   "./index.html",
   "./manifest.webmanifest",
+  "./sw.js",
 ];
 
 self.addEventListener("install", (event) => {
